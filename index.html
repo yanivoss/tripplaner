@@ -88,10 +88,9 @@ border-radius: 5px;
   </nav>
 
   <script>
-    const loginScreen = document.getElementById('login-screen');
     const planTripScreen = document.getElementById('plan-trip-screen');
     const myTripsScreen = document.getElementById('my-trips-screen');
-const dailyNotesDiv = document.getElementById('daily-notes');
+    const dailyNotesDiv = document.getElementById('daily-notes');
     const tripsListDiv = document.getElementById('trips-list');
 
     function showScreen(screenId) {
@@ -100,18 +99,6 @@ const dailyNotesDiv = document.getElementById('daily-notes');
       document.getElementById(screenId).classList.remove('hidden');
       if (screenId === 'my-trips-screen') {
         loadTrips();
-      }
-    }
-
-    function login() {
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      if (username && password) {
-        localStorage.setItem('loggedIn', 'true');
-        loginScreen.classList.add('hidden');
-        showScreen('plan-trip-screen');
-      } else {
-        alert('אנא הזן שם משתמש וסיסמה.');
       }
     }
 
