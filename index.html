@@ -1,114 +1,173 @@
-
-```html
 <!DOCTYPE html>
-<html lang="he">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>מתכנן טיולים</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>טיול אישי</title>
   <style>
-    body { font-family: Arial; padding: 20px; direction: rtl; }
-    .hidden { display: none; }
-    input, textarea, button { margin: 5px 0; display: block; width: 100%; max-width: 400px; }
-    .trip-card { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
-    nav button { margin-left: 10px; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    .container {
+      padding: 20px;
+max-width: 800px;
+      margin: 0 auto;
+    }
+    .tabs {
+      display: flex;
+      justify-content: space-around;
+      background-color: #333;
+      color: white;
+    }
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .tab:hover {
+      background-color: #575757;
+    }
+    .active-tab {
+      background-color: #007BFF;
+    }
+    .content {
+      display: none;
+    }
+    .active-content {
+      display: block;
+    }
+    input[type="date"], input[type="text"], textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      padding: 10px;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #218838;
+    }
   </style>
 </head>
 <body>
+  <div class="container">
+    <div class="tabs">
+      <div class="tab active-tab" onclick="switchTab(0)">תכנון טיול</div>
+      <div class="tab" onclick="switchTab(1)">הטיולים שלי</div>
+    </div>
 
-<div id="login">
-  <h2>התחברות</h2>
-  <input id="username" placeholder="שם משתמש">
-  <input id="password" type="password" placeholder="סיסמה">
-  <button onclick="login()">התחבר</button>
-</div>
+    <!-- תכנון טיול -->
+    <div id="plan-trip" class="content active-content">
+      <h2>יצירת טיול חדש</h2>
+      <input type="text" id="trip-name" placeholder="שם הטיול">
+<input type="date" id="start-date">
+      <input type="date" id="end-date">
+      <button onclick="saveTrip()">שמור טיול</button>
+    </div>
 
-<div id="app" class="hidden">
-  <nav>
-    <button onclick="showCreate()">+ טיול חדש</button>
-    <button onclick="showTrips()">הטיולים שלי</button>
-    <button onclick="logout()">התנתק</button>
-  </nav>
+    <!-- הטיולים שלי -->
+    <div id="my-trips" class="content">
+      <h2>הטיולים שלי</h2>
+      <ul id="trips-list"></ul>
+    </div>
 
-  <div id="createTrip" class="hidden">
-    <h2>יצירת טיול</h2>
-    <input id="tripName" placeholder="שם הטיול">
-    <input id="tripDates" placeholder="תאריכים">
-    <textarea id="tripPlan" placeholder="לו״ז יומי והערות"></textarea>
-<button onclick="saveTrip()">שמור טיול</button>
+    <div id="trip-details" class="content">
+      <h2>פרטי הטיול</h2>
+      <div id="trip-info"></div>
+      <textarea id="daily-notes" placeholder="הוסף הערות ליום זה"></textarea>
+      <button onclick="saveDailyNotes()">שמור הערות</button>
+    </div>
   </div>
 
-  <div id="tripList" class="hidden">
-    <h2>הטיולים שלי</h2>
-    <div id="trips"></div>
-  </div>
-</div>
+  <script>
+    // שמירה והצגה של טיולים ב-localStorage
+    function saveTrip() {
+      const tripName = document.getElementById("trip-name").value;
+      const startDate = document.getElementById("start-date").value;
+      const endDate = document.getElementById("end-date").value;
 
-<script>
-  const VALID_USER = "yanivn78@gmail.com";
-  const VALID_PASS = "0508298008";
+      if (tripName && startDate && endDate) {
+        let trips = JSON.parse(localStorage.getItem("trips")) || [];
+        const newTrip = {
+          name: tripName,
+          startDate: startDate,
+          endDate: endDate,
+          notes: []
+        };
+        trips.push(newTrip);
+        localStorage.setItem("trips", JSON.stringify(trips));
+        alert("הטיול נשמר בהצלחה!");
+        loadTrips();
+      } else {
+        alert("נא למלא את כל השדות.");
+      }
+}
 
-  function login() {
-    const u = document.getElementById('username').value;
-    const p = document.getElementById('password').value;
-    if (u === VALID_USER && p === VALID_PASS) {
-      document.getElementById('login').classList.add('hidden');
-      document.getElementById('app').classList.remove('hidden');
-      showTrips();
-    } else {
-      alert("שם משתמש או סיסמה שגויים");
+    function loadTrips() {
+      const trips = JSON.parse(localStorage.getItem("trips")) || [];
+      const tripsList = document.getElementById("trips-list");
+      tripsList.innerHTML = '';
+      trips.forEach((trip, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = <a href="#" onclick="viewTrip(index)">{trip.name}</a>;
+        tripsList.appendChild(li);
+      });
     }
-  }
 
-  function logout() {
-    location.reload();
-  }
-
-  function showCreate() {
-    document.getElementById('createTrip').classList.remove('hidden');
-    document.getElementById('tripList').classList.add('hidden');
-  }
-
-  function showTrips() {
-    document.getElementById('createTrip').classList.add('hidden');
-    document.getElementById('tripList').classList.remove('hidden');
-    const trips = JSON.parse(localStorage.getItem('trips') || '[]');
-    const container = document.getElementById('trips');
-    container.innerHTML = '';
-    trips.forEach((trip, index) => {
-      const card = document.createElement('div');
-      card.className = 'trip-card';
-card.innerHTML = `
-        <strong>trip.name</strong><br>{trip.dates}<br>
-        <pre>trip.plan</pre>
-        <button onclick="deleteTrip({index})">🗑 מחק</button>
+    function viewTrip(index) {
+      const trips = JSON.parse(localStorage.getItem("trips")) || [];
+      const trip = trips[index];
+      const tripInfo = document.getElementById("trip-info");
+      tripInfo.innerHTML = `
+        <p><strong>שם הטיול:</strong> trip.name</p>
+        <p><strong>תאריך התחלה:</strong>{trip.startDate}</p>
+        <p><strong>תאריך סיום:</strong> ${trip.endDate}</p>
       `;
-      container.appendChild(card);
-    });
-  }
+      document.getElementById("trip-details").classList.add("active-content");
+      document.getElementById("my-trips").classList.remove("active-content");
+    }
 
-  function saveTrip() {
-    const name = document.getElementById('tripName').value;
-    const dates = document.getElementById('tripDates').value;
-    const plan = document.getElementById('tripPlan').value;
-    if (!name || !dates) return alert("נא למלא את כל השדות");
+    function saveDailyNotes() {
+      const notes = document.getElementById("daily-notes").value;
+      const trips = JSON.parse(localStorage.getItem("trips")) || [];
+      const currentTripIndex = trips.findIndex(trip => trip.name === document.getElementById("trip-name").value);
+if (currentTripIndex !== -1) {
+        trips[currentTripIndex].notes.push(notes);
+        localStorage.setItem("trips", JSON.stringify(trips));
+        alert("הערות נשמרו!");
+      }
+    }
 
-    const trips = JSON.parse(localStorage.getItem('trips') || '[]');
-    trips.push({ name, dates, plan });
-    localStorage.setItem('trips', JSON.stringify(trips));
-    document.getElementById('tripName').value = '';
-    document.getElementById('tripDates').value = '';
-    document.getElementById('tripPlan').value = '';
-    showTrips();
-  }
+    // החלפת מסכים
+    function switchTab(tabIndex) {
+      const tabs = document.querySelectorAll(".tab");
+      const contents = document.querySelectorAll(".content");
+      
+      tabs.forEach((tab, index) => {
+        if (index === tabIndex) {
+          tab.classList.add("active-tab");
+          contents[index].classList.add("active-content");
+        } else {
+          tab.classList.remove("active-tab");
+          contents[index].classList.remove("active-content");
+        }
+      });
+    }
 
-  function deleteTrip(index) {
-    const trips = JSON.parse(localStorage.getItem('trips') || '[]');
-    trips.splice(index, 1);
-    localStorage.setItem('trips', JSON.stringify(trips));
-    showTrips();
-  }
-</script>
-
+    // טעינת הטיולים לאחר טעינת הדף
+    window.onload = function() {
+      loadTrips();
+    };
+  </script>
 </body>
 </html>
-```
